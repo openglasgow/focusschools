@@ -1,68 +1,108 @@
-# FOCUS Schools Tool
+# focusschools
 
-The FOCUS tool is used by schools to compare themselves to other, similar schools. Similarity is scored in a variety of ways. This repo processes the data which goes into the tool.
+**focusschools** is a tool designed to help schools compare their performance to similar schools within Glasgow and the wider Glasgow City region. By analyzing data such as SIMD (Scottish Index of Multiple Deprivation), free school meal uptake, percentage of English as an additional language, and school roll size, the tool identifies and groups schools based on similarity. The comparison supports schools in benchmarking and improving their outcomes.
 
-More information on the FOCUS tool can be found in the following places:
+The tool has been expanded in 2024 to include the following local authorities: 
 
-* https://glasgow.gov.uk/index.aspx?articleid=23801
-* https://glasgow.gov.uk/index.aspx?articleid=23800
+- East Dunbartonshire
+- East Renfrewshire
+- Glasgow
+- Inverclyde
+- North Lanarkshire
+- Renfrewshire
+- South Lanarkshire
+- West Dunbartonshire.
 
-## User Guide
+Put simply it:
 
-This section instructs you how to re-run the code, either with new data or the same data used previously, without getting too far into the weeds of the technical details.
+- Compares primary and secondary schools across multiple local authorities.
+- Ranks similar schools using a custom distance calculation algorithm. See the section on **Similarity Calculations** below.
+- Exports detailed comparison tables in both .xlsx and .csv formats with a specified number of comparison schools
+- Generates within-local-authority and across-authority comparisons.
 
-### Folder Overview
+The outputs of this project are loaded into the FOCUS schools tool.
 
-## Technical Guide
+### Setup
 
-This section goes into more technical details about the project and code. 
+The repository is hosted on the `openglasgow` GitHub account. The account is 
+private so you will need to be added to it. Speak to either:
 
-I have written the code in such a way that (I hope) it is understandable and usable for beginners to R. If you already know R you might find my documentation and comments in my code to be overkill but given there are only a few of us in GCC that know R I think my approach is the right one.
+- Neil Currie - neil.currie@glasgow.gov.uk
+- Guy Wells - guy.wells@glasgow.gov.uk
+- Steven Livingstone-Perez - steven.livingstone-perez@glasgow.gov.uk
 
-### GitHub
+1. Clone the repository:
 
-### Packages
+```
+git clone https://github.com/openglasgow/focusschools.git
+```
 
-In `scripts/install-packges.R` you will find a script that installs packages used in this script to your machine. You will only need to run this once per machine - they are now installed on your machine and can be called using `library(packagename)`. 
+2. Place the input data files in the data directory adjacent to the project repository:
 
-Packages change over time, it may be that some small aspect of the code errors and no longer works. To avoid this there is a practice known as dependency control but, to be honest, for small analyses like this, and for beginners, I think it causes more confusion and chaos than it saves. You'll just need to problem solve but I don't envisage this being a major issue.
+```
+/path/focusschools/
+   ├── data/
+        ├── Glasgow_input.xlsx
+        ├── North Lanarkshire_input.xlsx
+        └── [Other Local Authority Data]
+   ├── focusschools/
+         ├── .gitignore
+         ├── focusschools.Rproj
+         ├── functions/
+         ├── README.md         
+         ├── run.R       
+         └── [Other Project Files]
+```
 
-### functions.R
+### Dependencies
 
-### run.R
+The project will automatically install the required R packages if they are not already installed:
+These packages will be installed and loaded automatically when running the main script.
 
-This is the main script that does everything. 
+### Usage
 
-### Coding Style
+1. Open the `focusschools.Rproj` file in RStudio.
+2. Open `run.R` and run the code.
+3. The output files will be saved in the `output` folder within the project folder. If no folder exists one will be created. Output files are in both xlsx and csv format. Files will include:
+- All LAs_primary-schools.xlsx
+- All LAs_secondary-schools.xlsx
+- [Local Authority]_primary-schools.xlsx
+- [Local Authority]_secondary-schools.xlsx
 
-#### Style Guide
+### Input Data Requirements
 
-I pretty much follow the tidyverse style guide which you can find here:
+Input data should be in .xlsx format and named in the following way:
 
-https://style.tidyverse.org/
+- File naming convention: [Local Authority]_input.xlsx with a single sheet
+- Each file is read in using readxl::read_excel
+- File structure is checked using the `check_input_data` function. See this function for required variable names.
 
-#### Pipes
+### Similarity Calculations
 
-In this code you will find pipes %>%, you can look them up. They make coding with R great. The pipe used in this code is the pipe from the magrittr package. This is where the pipe in R first appeared. Because of it's wildly success they build pipes into base R. 
+Similarity is calculated using the following metrics:
 
-Given you will be running this in the future it is likely you might be more familiar with the base R pipe |>. If this confuses you look it up, it may be that you hardly see the old pipes anywhere and didn't even know they were a thing.
+- School roll i.e. the number of pupils attending the school
+- Free School Meals uptake percentage
+- The percentage of pupils for whom English is an additional language
+- SIMD
 
-#### Calling Functions from Packages
+For the school roll, I calculate the mean school roll and change this variable to be the percentage difference from the mean school roll.
 
-I have adopted the convention of loading all the packages I use at the top of the script with `library(packagename)` calls.
+SIMD is slightly more involved and is split into 2 measures:
 
-This means the functions within that package can be simply called using the following syntax: `function_name(arguments, ...)`. 
+- The mean SIMD
+- The standard deviation in SIMD
 
-To make it clear which function is from which package, the first time I use a function from package I use the following syntax `packagename::function_name(arguments, ...)` then default to the prior syntax. Hopefully that helps you understand the code a bit more.
+The mean SIMD is calculated using a weighted mean. The count and percentage of pupils living in SIMD areas 1 to 10 is contained in the input data. As an example, to calculate the mean SIMD for a random school you would do the following:
 
+```
+Mean SIMD = (1 * simd_1%) + (2 * simd_1%) + ... + (10 * simd_10%)
+```
 
+However, just using the mean can hide inequality in a school catchment area. The old methodology used a custom variance measure. I changed this to standard deviation because I think it is a better statistical approach since standard deviations have the same units as the original data. Variance is the square of the standard deviation. Therefore, for this use, I think it could over inflated differences. It is broadly the same principle though, it is still a measure of dispersion.
 
+When all the input data is sorted the distance between each school and every other school is calculated in a similar way to an error measure in a stats model. This is done in `calc_distances` function. 
 
+A star rating system is applied which displays the closeness of the match. 3 starts indicates a very good match, 2 a less good match and 1 a not so good match. This was a feature of the original tool. I updated it to be done in a more automated way as the thresholds for the stars seemed to be hardcoded before.
 
-
-
-
-
-
-
-
+For some local authorities they have few schools. Therefore, fewer within-local authority comparisons can be made. Therefore, the number of comparisons generated for each school is adjusted up to a maximum of 10 schools.
