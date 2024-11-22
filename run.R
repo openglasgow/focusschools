@@ -3,10 +3,6 @@
 
 message('---> Setting things up')
 
-# Must be exactly the same name as the folder, Rproj and GitHub repo
-
-project_name <- 'focusschools'
-
 # Load packages - if required then install
 
 packages <- c("here", "openxlsx", "dplyr", "stringr", "purrr",
@@ -22,31 +18,47 @@ for (pkg in packages) {
  
 }
 
-message(paste('---> Loaded', paste(packages, collapse = ', ')))
+message('---> Loaded packages: ', paste(packages, collapse = ', '))
 
-# Setup paths for easy access (working directory = wd)
+# Setup paths for easy access
 
-wd <- list() 
+dirs <- list() 
 
-wd$wd <- here()
+dirs$working_dir <- here()
+
+project_name <- dirs$working_dir |> 
+  list.files(pattern = '.Rproj') |> 
+  str_replace('.Rproj', '')
 
 # Find data path based on project name
 
-wd_split <- wd$wd |> str_split('/') |> unlist()
-first_project_name_pos <- which(wd_split == project_name)[1]
-wd_split <- wd_split[1:first_project_name_pos]
-wd$data <- wd_split |> paste0(collapse = '/') |> paste0('/data')
+working_dir_split <- dirs$working_dir |> str_split('/') |> unlist()
+master_dir_pos <- which(working_dir_split == project_name)[1]
+dirs$master_dir <- paste(working_dir_split[1:master_dir_pos], collapse = '/')
 
-wd$functions <- file.path(wd$wd, 'functions')
-wd$output <- file.path(wd$wd, 'output')
+dirs$data <- file.path(dirs$master_dir, 'data')
 
-if (!dir.exists(wd$output)) dir.create(wd$output)
+dirs$functions <- file.path(dirs$working_dir, 'functions')
+dirs$output <- file.path(dirs$master_dir, 'output')
 
+if (!dir.exists(dirs$output)) { 
+  
+  message('---> Created output folder ', dirs$output)
+  
+  dir.create(dirs$output)
+
+}
+  
 # Read in custom functions
 
-function_files <- list.files(wd$functions, full.names = TRUE, pattern = '.R')
+function_files <- list.files(dirs$functions, full.names = TRUE, pattern = '.R')
 
 walk(function_files, source)
+
+function_files_short <- list.files(dirs$functions, pattern = '.R')
+
+message('---> Loaded custom function files: ', 
+        paste(function_files_short, collapse = ', '))
 
 # Data prep --------------------------------------------------------------------
 
@@ -55,11 +67,11 @@ message('---> Preparing the data')
 # If you have an Excel file open on a Mac a temporary copy is saved in the same
 # folder with this prefix: '~$'. The str_subset line drops this out.
 
-files <- list.files(wd$data, pattern = '_input.xlsx', 
+files <- list.files(dirs$data, pattern = '_input.xlsx', 
                     full.names = TRUE) |> 
   str_subset('\\~\\$', negate = TRUE)
 
-la_names <- wd$data |> 
+la_names <- dirs$data |> 
   list.files(pattern = '_input.xlsx') |> 
   str_subset('\\~\\$', negate = TRUE) |> 
   str_replace('_input.xlsx', '')
@@ -90,7 +102,7 @@ primary_inputs <- build_inputs(primary_data)
 primary_tables <- calc_distances(primary_inputs, 10)
 primary_output <- format_tables(primary_tables, primary_data)
 
-file_primary_output_xlsx <- file.path(wd$output, 
+file_primary_output_xlsx <- file.path(dirs$output, 
                                  'All LAs_primary-schools.xlsx')
 
 file_primary_output_csv <- str_replace(file_primary_output_xlsx,
@@ -105,7 +117,7 @@ secondary_inputs <- build_inputs(secondary_data)
 secondary_tables <- calc_distances(secondary_inputs, 10)
 secondary_output <- format_tables(secondary_tables, secondary_data)
 
-file_secondary_output_xlsx <- file.path(wd$output, 
+file_secondary_output_xlsx <- file.path(dirs$output, 
                                    'All LAs_secondary-schools.xlsx')
 
 file_secondary_output_csv <- str_replace(file_secondary_output_xlsx,
@@ -143,7 +155,7 @@ for (i in 1:num_las) {
   primary_output_la[[i]] <- format_tables(primary_tables_la, primary_data_la)
   
   file_primary_output_la_xlsx <- file.path(
-    wd$output, 
+    dirs$output, 
     paste0(la_names[i], '_primary-schools.xlsx')
     )
   
@@ -170,7 +182,7 @@ for (i in 1:num_las) {
                                             secondary_data_la)
   
   file_secondary_output_la_xlsx <- file.path(
-    wd$output, 
+    dirs$output, 
     paste0(la_names[i], '_secondary-schools.xlsx')
   )
   
