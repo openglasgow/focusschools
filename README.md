@@ -1,8 +1,19 @@
 # focusschools
 
-**focusschools** is a tool designed to help schools compare their performance to similar schools within Glasgow and the wider Glasgow City region. By analyzing data such as SIMD (Scottish Index of Multiple Deprivation), free school meal uptake, percentage of English as an additional language, and school roll size, the tool identifies and groups schools based on similarity. The comparison supports schools in benchmarking and improving their outcomes.
+This code was created by Neil Currie (neil.currie@glasgow.gov.uk | neil.george.currie@gmail.com) with thanks to Guy Wells for providing QA.
 
-The tool has been expanded in 2024 to include the following local authorities: 
+## Purpose of the FOCUS schools tool
+
+FOCUS is a web tool that helps schools compare pupil achievement with other, *similar* schools. It uses data like English as an Additional Language (EAL), deprivation (SIMD), free meal uptake and school roll size. The goal is to avoid unfair comparisons, like between schools in very rich and very poor areas, and instead focus on schools with similar challenges. Schools then form networks of their peer schools, and can then share ideas and best practice and improve results together.
+
+https://www.ceg.org.uk/focus.shtml
+
+
+## Purpose of this repo
+
+In 2024, the data team were approached to review the methodology and re-run the comparisons for Glasgow. The comparison file will then be loaded into the FOCUS tool. We were then asked to expand the tool to include all schools in the Glasgow City Region. This repo stores the code, methods, and documents for the project, making it easy to update and collaborate on in the future.
+
+In the November 2024 run, this repo included the following local authorities: 
 
 - East Dunbartonshire
 - East Renfrewshire
@@ -11,7 +22,9 @@ The tool has been expanded in 2024 to include the following local authorities:
 - North Lanarkshire
 - Renfrewshire
 - South Lanarkshire
-- West Dunbartonshire.
+- West Dunbartonshire
+
+However, it could easily be expanded to other local authorities by simply adding xlsx to the data folder in the same format (more on that later).
 
 Put simply it:
 
@@ -24,23 +37,44 @@ The outputs of this project are loaded into the FOCUS schools tool.
 
 ### Setup
 
-The repository is hosted on the `openglasgow` GitHub account. The account is 
-private so you will need to be added to it. Speak to either:
-
-- Neil Currie - neil.currie@glasgow.gov.uk
-- Guy Wells - guy.wells@glasgow.gov.uk
-- Steven Livingstone-Perez - steven.livingstone-perez@glasgow.gov.uk
+The repository is hosted on the `openglasgow` GitHub account and is publicly available.
 
 1. Clone the repository:
+
+From the terminal, navigate to the folder where you would like to host the 
+project and create a folder called `focusschools`. You then want to navigate to
+this new folder. 
+
+For me this looks like:
+
+```
+cd Developer
+mkdir focusschools
+cd focusschools
+```
+
+Now you want to clone the git repo into here.
 
 ```
 git clone https://github.com/openglasgow/focusschools.git
 ```
 
-2. Place the input data files in the data directory adjacent to the project repository:
+2. Setup your data folder and files
+
+Create a folder for your data files to be stored in. This should be adjacent to 
+the repo you cloned, so, from same folder, in my case that would be 
+`/Developer/focusschools/`. If you've just cloned the repo you are already here.
+
+You can do it manually or from the terminal. Run:
 
 ```
-/path/focusschools/
+mkdir data
+```
+
+Now add in your data files. You'll end up with a structure like the below.
+
+```
+/Developer/focusschools/
    ├── data/
         ├── Glasgow_input.xlsx
         ├── North Lanarkshire_input.xlsx
@@ -56,8 +90,8 @@ git clone https://github.com/openglasgow/focusschools.git
 
 ### Dependencies
 
-The project will automatically install the required R packages if they are not already installed:
-These packages will be installed and loaded automatically when running the main script.
+The project will automatically install the required R packages if they are not 
+already installed when you trigger the `run.R` file.
 
 ### Usage
 
