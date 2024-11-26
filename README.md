@@ -88,6 +88,19 @@ Now add in your data files. You'll end up with a structure like the below.
          └── [Other Project Files]
 ```
 
+Naming your data files in the form "Local Authority Name_input.xlsx" is very 
+important. Without the "_input.xlsx" the code will not work.
+
+The structure of the data is also important - see *Input Data Requirements* below.
+
+### Input Data Requirements
+
+Input data should be in .xlsx format and named in the following way:
+
+- File naming convention: [Local Authority]_input.xlsx with a single sheet
+- Each file is read in using readxl::read_excel
+- File structure is checked using the `check_input_data` function. See this function for required variable names.
+
 ### Dependencies
 
 The project will automatically install the required R packages if they are not 
@@ -102,14 +115,6 @@ already installed when you trigger the `run.R` file.
 - All LAs_secondary-schools.xlsx
 - [Local Authority]_primary-schools.xlsx
 - [Local Authority]_secondary-schools.xlsx
-
-### Input Data Requirements
-
-Input data should be in .xlsx format and named in the following way:
-
-- File naming convention: [Local Authority]_input.xlsx with a single sheet
-- Each file is read in using readxl::read_excel
-- File structure is checked using the `check_input_data` function. See this function for required variable names.
 
 ### Similarity Calculations
 
