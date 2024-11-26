@@ -101,6 +101,8 @@ Input data should be in .xlsx format and named in the following way:
 - Each file is read in using readxl::read_excel
 - File structure is checked using the `check_input_data` function. See this function for required variable names.
 
+See Fake Local Authority Name_input.xlsx for an example structure of the input files.
+
 ### Dependencies
 
 The project will automatically install the required R packages if they are not 
