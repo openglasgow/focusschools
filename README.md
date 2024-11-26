@@ -93,6 +93,32 @@ important. Without the "_input.xlsx" the code will not work.
 
 The structure of the data is also important - see *Input Data Requirements* below.
 
+3. Set Up the R Environment with renv
+
+To ensure the project uses the correct package versions, we use *renv* for dependency management.
+
+Open the R Studio project file focusschools.Rproj. If not already installed,
+install the *renv* package on to your machine:
+
+```
+install.packages("renv")
+```
+
+Now, still with the project opened in RStudio (open focusschools.Rproj), run the 
+following command in the R console to restore the environment. This will ensure
+the correct versions of all the packages used are all available to this project
+only. It won't affect any other packages you have installed.
+
+```
+renv::restore()
+```
+
+This will install all the packages required for the project, using the versions 
+specified in the renv.lock file.
+
+Note: The first time you run this, it may take some time as it installs all the 
+necessary packages.
+
 ### Input Data Requirements
 
 Input data should be in .xlsx format and named in the following way:
