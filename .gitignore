@@ -1,3 +1,11 @@
+
+# Ignore the renv library (local package installations)
+
+renv/library/
+renv/staging/
+renv/cache/
+
+
 # History files
 .Rhistory
 .Rapp.history
