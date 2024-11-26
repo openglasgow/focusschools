@@ -3,22 +3,21 @@
 
 message('---> Setting things up')
 
-# Load packages - if required then install
+# Load packages
 
-packages <- c("here", "openxlsx", "dplyr", "stringr", "purrr",
-              "readr", "stringdist", "janitor", "readxl")
-
-not_installed <- packages[!(packages %in% installed.packages()[, "Package"])]
-
-if (length(not_installed) > 0) install.packages(not_installed)
-
-for (pkg in packages) { 
+suppressPackageStartupMessages({
   
-  suppressPackageStartupMessages(library(pkg, character.only = TRUE))
- 
-}
-
-message('---> Loaded packages: ', paste(packages, collapse = ', '))
+  library(here)
+  library(openxlsx)
+  library(dplyr)
+  library(stringr)
+  library(purrr)
+  library(readr)
+  library(stringdist)
+  library(janitor)
+  library(readxl)
+  
+})
 
 # Setup paths for easy access
 
@@ -92,6 +91,13 @@ schools_data <- files |>
 primary_data <- filter(schools_data, sector == 'Primary')
 secondary_data <- filter(schools_data, sector == 'Secondary')
 
+# Specify number of comparisons ------------------------------------------------
+
+num_comparisons_primary_overall <- 10
+num_comparisons_secondary_overall <- 10
+num_comparisons_primary_la <- 10
+num_comparisons_secondary_la <- 5
+
 # Overall comparison -----------------------------------------------------------
 
 message('---> Processing for all schools')
@@ -99,7 +105,9 @@ message('---> Processing for all schools')
 # Primaries
 
 primary_inputs <- build_inputs(primary_data)
-primary_tables <- calc_distances(primary_inputs, 10)
+primary_tables <- calc_distances(primary_inputs, 
+                                 num_comparisons_primary_overall)
+
 primary_output <- format_tables(primary_tables, primary_data)
 
 file_primary_output_xlsx <- file.path(dirs$output, 
@@ -114,7 +122,9 @@ write_csv(primary_output, file_primary_output_csv, progress = FALSE)
 # Secondaries
 
 secondary_inputs <- build_inputs(secondary_data)
-secondary_tables <- calc_distances(secondary_inputs, 10)
+secondary_tables <- calc_distances(secondary_inputs, 
+                                   num_comparisons_secondary_overall)
+
 secondary_output <- format_tables(secondary_tables, secondary_data)
 
 file_secondary_output_xlsx <- file.path(dirs$output, 
@@ -144,53 +154,49 @@ for (i in 1:num_las) {
   
   primary_data_la <- filter(primary_data, 
                             local_authority == la_names[i])
-  
-  num_comparisons_primary_la <- calc_num_comparisons(nrow(primary_data_la))
-  
+
   primary_inputs_la <- build_inputs(primary_data_la)
-  
-  primary_tables_la <- calc_distances(primary_inputs_la, 
+
+  primary_tables_la <- calc_distances(primary_inputs_la,
                                       num_comparisons_primary_la)
-  
+
   primary_output_la[[i]] <- format_tables(primary_tables_la, primary_data_la)
-  
+
   file_primary_output_la_xlsx <- file.path(
-    dirs$output, 
+    dirs$output,
     paste0(la_names[i], '_primary-schools.xlsx')
     )
-  
+
   file_secondary_output_la_csv <- str_replace(file_primary_output_la_xlsx,
                                               '.xlsx', '.csv')
 
   write.xlsx(primary_output_la[[i]], file_primary_output_la_xlsx)
-  write_csv(primary_output_la[[i]], file_secondary_output_la_csv, 
+  write_csv(primary_output_la[[i]], file_secondary_output_la_csv,
             progress = FALSE)
-  
+
   # Secondary Schools
   
   secondary_data_la <- filter(secondary_data, 
                               local_authority == la_names[i])
   
-  num_comparisons_secondary_la <- calc_num_comparisons(nrow(secondary_data_la))
-  
   secondary_inputs_la <- build_inputs(secondary_data_la)
-  
-  secondary_tables_la <- calc_distances(secondary_inputs_la, 
+
+  secondary_tables_la <- calc_distances(secondary_inputs_la,
                                         num_comparisons_secondary_la)
-  
-  secondary_output_la[[i]] <- format_tables(secondary_tables_la, 
+
+  secondary_output_la[[i]] <- format_tables(secondary_tables_la,
                                             secondary_data_la)
-  
+
   file_secondary_output_la_xlsx <- file.path(
-    dirs$output, 
+    dirs$output,
     paste0(la_names[i], '_secondary-schools.xlsx')
   )
-  
+
   file_secondary_output_la_csv <- str_replace(file_secondary_output_la_xlsx,
                                               '.xlsx', '.csv')
-  
+
   write.xlsx(secondary_output_la[[i]], file_secondary_output_la_xlsx)
-  write_csv(secondary_output_la[[i]], file_secondary_output_la_csv, 
+  write_csv(secondary_output_la[[i]], file_secondary_output_la_csv,
             progress = FALSE)
   
 }
